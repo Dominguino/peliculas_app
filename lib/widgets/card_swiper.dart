@@ -15,6 +15,7 @@ class CardSwiper extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
+// este if genera el ciruclo "cargando" hasta que se ha generado mas de un movies
     if (this.movies.length == 0) {
       return Container(
         width: double.infinity,
@@ -38,8 +39,8 @@ class CardSwiper extends StatelessWidget {
             print(movie.fullPosterImg);
 
             return GestureDetector(
-              onTap: () => Navigator.pushNamed(context, 'details',
-                  arguments: 'movie-instance'),
+              onTap: () =>
+                  Navigator.pushNamed(context, 'details', arguments: movie),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: FadeInImage(

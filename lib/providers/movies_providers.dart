@@ -13,6 +13,10 @@ class MoviesProvider extends ChangeNotifier {
 
   List<Movie> popularMovies = [];
 
+  Map<int, List<Cast>> moviesCast = {};
+
+  int _popularPage = 0;
+
   MoviesProvider() {
     print('MoviesProvider incializando');
 
@@ -20,21 +24,29 @@ class MoviesProvider extends ChangeNotifier {
     getPopularMovies();
   }
 
-  getOnDisplayMovies() async {
-    var url = Uri.https(_baseUrl, '3/movie/now_playing',
-        {'api_key': _apiKey, 'language': _language, 'page': '1'});
+  Future<String> _getJsonData(String endpoint, [int page = 1]) async {
+    // lo del int hace que sea opcional pasar ese parametro y si no se pasa le da valor "1"
+    var url = Uri.https(_baseUrl, endpoint,
+        {'api_key': _apiKey, 'language': _language, 'page': '$page'});
 
     // Await the http get response, then decode the json-formatted response.
     final response = await http.get(url);
-    final nowPlayingResponse = NowPlayingResponse.fromJson(response.body);
 
-    final Map<String, dynamic> decodeData = json.decode(response.body);
+    return response.body;
+  }
+
+  getOnDisplayMovies() async {
+    final jsonData = await _getJsonData('3/movie/now_playing');
+
+    final nowPlayingResponse = NowPlayingResponse.fromJson(jsonData);
+
+    final Map<String, dynamic> decodeData = json.decode(jsonData);
 
     //
     //para comprobar que la conexión se realiza
     //if (response.statusCode != 200) return print('error');
 
-    print(nowPlayingResponse.results[0].title);
+    //  print(nowPlayingResponse.results[0].title);
 
     onDisplayMovies = nowPlayingResponse.results;
 
@@ -42,18 +54,27 @@ class MoviesProvider extends ChangeNotifier {
   }
 
   getPopularMovies() async {
-    var url = Uri.https(_baseUrl, '3/movie/popular',
-        {'api_key': _apiKey, 'language': _language, 'page': '1'});
+    final jsonData = await _getJsonData('3/movie/popular', 1);
 
-    // Await the http get response, then decode the json-formatted response.
-    final response = await http.get(url);
-    final popularResponse = PopularResponse.fromJson(response.body);
+    final popularResponse = PopularResponse.fromJson(jsonData);
 
-    final Map<String, dynamic> decodeData = json.decode(response.body);
+    final Map<String, dynamic> decodeData = json.decode(jsonData);
 
     popularMovies = [...popularMovies, ...popularResponse.results];
 
     print(popularMovies[0]);
     notifyListeners();
+
+    _popularPage++;
+  }
+
+  Future<List<Cast>> getMovieCast(int movieId) async {
+    print('pidiendo info al servidor - Cast');
+
+    final jsonData = await _getJsonData('3/movie/$movieId/credits');
+    final creditsResponse = CreditsResponse.fromJson(jsonData);
+
+    moviesCast[movieId] = creditsResponse.cast;
+    return creditsResponse.cast;
   }
 }
