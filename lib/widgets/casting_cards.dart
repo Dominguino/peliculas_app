@@ -17,9 +17,9 @@ class CastingCards extends StatelessWidget {
       builder: (_, AsyncSnapshot<List<Cast>> snapshot) {
         if (!snapshot.hasData) {
           return Container(
-            constraints: BoxConstraints(maxWidth: 300),
+            constraints: const BoxConstraints(maxWidth: 300),
             height: 180,
-            child: CupertinoActivityIndicator(),
+            child: const CupertinoActivityIndicator(),
           );
         }
 
@@ -31,7 +31,7 @@ class CastingCards extends StatelessWidget {
           height: 180,
           //color: Colors.red,
           child: ListView.builder(
-              itemBuilder: (_, int index) => _CastCard(),
+              itemBuilder: (_, int index) => _CastCard(cast[index]),
               scrollDirection: Axis.horizontal,
               itemCount: 10),
         );
@@ -41,6 +41,8 @@ class CastingCards extends StatelessWidget {
 }
 
 class _CastCard extends StatelessWidget {
+  final Cast actor;
+  const _CastCard(this.actor);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -52,9 +54,9 @@ class _CastCard extends StatelessWidget {
           children: [
             ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: const FadeInImage(
-                  image: NetworkImage('https://via.placeholder.com/150x300'),
-                  placeholder: AssetImage('assets/no-image.jpg'),
+                child: FadeInImage(
+                  image: NetworkImage(actor.fullProfilePath),
+                  placeholder: const AssetImage('assets/no-image.jpg'),
                   height: 140,
                   width: 100,
                   fit: BoxFit.cover,
